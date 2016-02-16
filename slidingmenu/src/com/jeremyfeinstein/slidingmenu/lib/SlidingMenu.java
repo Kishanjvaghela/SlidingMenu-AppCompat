@@ -1,8 +1,5 @@
 package com.jeremyfeinstein.slidingmenu.lib;
 
-import java.lang.reflect.Method;
-
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -15,15 +12,17 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -31,6 +30,8 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.jeremyfeinstein.slidingmenu.lib.CustomViewAbove.OnPageChangeListener;
+
+import java.lang.reflect.Method;
 
 public class SlidingMenu extends RelativeLayout {
 
@@ -389,7 +390,7 @@ public class SlidingMenu extends RelativeLayout {
     /**
      * Set the behind view (menu) content to the given View.
      *
-     * @param view The desired content to display.
+     * @param v The desired content to display.
      */
     public void setMenu(View v) {
         mViewBehind.setContent(v);
@@ -417,7 +418,7 @@ public class SlidingMenu extends RelativeLayout {
     /**
      * Set the secondary behind view (right menu) content to the given View.
      *
-     * @param view The desired content to display.
+     * @param v The desired content to display.
      */
     public void setSecondaryMenu(View v) {
         mViewBehind.setSecondaryContent(v);
@@ -1027,25 +1028,51 @@ public class SlidingMenu extends RelativeLayout {
 
     private void setMyPadding(Rect rect) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            WindowManager manager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-            switch (manager.getDefaultDisplay().getRotation()) {
-                case Surface.ROTATION_90:
-                    rect.right += getNavBarWidth();
-                    break;
-                case Surface.ROTATION_180:
-                    rect.top += getNavBarHeight();
-                    break;
-                case Surface.ROTATION_270:
-                    rect.left += getNavBarWidth();
-                    break;
-                default:
-                    rect.bottom += getNavBarHeight();
+            if (hasNavBar(getContext())) {
+                WindowManager manager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+                switch (manager.getDefaultDisplay().getRotation()) {
+                    case Surface.ROTATION_90:
+                        rect.right += getNavBarWidth();
+                        break;
+                    case Surface.ROTATION_180:
+                        rect.top += getNavBarHeight();
+                        break;
+                    case Surface.ROTATION_270:
+                        rect.left += getNavBarWidth();
+                        break;
+                    default:
+                        rect.bottom += getNavBarHeight();
+                }
             }
         }
         Log.v(TAG, "setting padding!");
         setPadding(
                 rect.left, rect.top, rect.right, rect.bottom
         );
+    }
+
+    /**
+     * check is system has navigation bar or not
+     * http://stackoverflow.com/a/29120269/3758898
+     *
+     * @param context context
+     * @return true if navigation bar is present or false
+     */
+    boolean hasNavBar(Context context) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            // navigation bar was introduced in Android 4.0 (API level 14)
+            Resources resources = context.getResources();
+            int id = resources.getIdentifier("config_showNavigationBar", "bool", "android");
+            if (id > 0) {
+                return resources.getBoolean(id);
+            } else {    // Check for keys
+                boolean hasMenuKey = ViewConfiguration.get(context).hasPermanentMenuKey();
+                boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
+                return !hasMenuKey && !hasBackKey;
+            }
+        } else {
+            return false;
+        }
     }
 
     private int getNavBarWidth() {
