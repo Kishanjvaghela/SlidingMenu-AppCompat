@@ -8,7 +8,6 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -16,6 +15,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyCharacterMap;
@@ -31,8 +31,6 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.jeremyfeinstein.slidingmenu.lib.CustomViewAbove.OnPageChangeListener;
-
-import java.lang.reflect.Method;
 
 public class SlidingMenu extends RelativeLayout {
 
@@ -640,21 +638,12 @@ public class SlidingMenu extends RelativeLayout {
      *
      * @param i The width the Sliding Menu will open to, in pixels
      */
-    @SuppressWarnings("deprecation")
     public void setBehindWidth(int i) {
-        int width;
         Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
-        try {
-            Class<?> cls = Display.class;
-            Class<?>[] parameterTypes = {Point.class};
-            Point parameter = new Point();
-            Method method = cls.getMethod("getSize", parameterTypes);
-            method.invoke(display, parameter);
-            width = parameter.x;
-        } catch (Exception e) {
-            width = display.getWidth();
-        }
+        DisplayMetrics metrics = new DisplayMetrics();
+        display.getMetrics(metrics);
+        int width = metrics.widthPixels;
         setBehindOffset(width - i);
     }
 

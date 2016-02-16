@@ -5,8 +5,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.jeremyfeinstein.slidingmenu.lib.app.SlidingActivity;
@@ -35,7 +33,8 @@ public class MainActivity extends SlidingActivity {
         sm.setShadowWidthRes(R.dimen.shadow_width);
         sm.setFadeDegree(0.35f);
         sm.setMode(SlidingMenu.RIGHT);
-        sm.setBehindOffsetRes(R.dimen.slidingmenu_offset);
+        sm.setBehindWidthRes(R.dimen.slidingmenu_width);
+//        sm.setBehindOffsetRes(R.dimen.slidingmenu_offset);
         sm.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
         sm.setShadowDrawable(R.drawable.shadow);
     }
